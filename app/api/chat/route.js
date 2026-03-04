@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 
+export const runtime = "nodejs";
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -10,42 +12,24 @@ export async function POST(req) {
     const message = body.message;
 
     if (!message) {
-      return Response.json(
-        { reply: "Pesan kosong." },
-        { status: 400 }
-      );
-    }
-
-    if (!process.env.OPENAI_API_KEY) {
-      return Response.json(
-        { reply: "OPENAI_API_KEY belum diset." },
-        { status: 500 }
-      );
+      return Response.json({ reply: "Pesan kosong." }, { status: 400 });
     }
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: "Kamu adalah AI Santri yang sopan, ramah, dan cerdas.",
-        },
-        {
-          role: "user",
-          content: message,
-        },
+        { role: "system", content: "Kamu adalah AI Santri." },
+        { role: "user", content: message },
       ],
     });
 
     const reply =
-      completion.choices?.[0]?.message?.content ||
-      "AI tidak memberikan jawaban.";
+      completion.choices?.[0]?.message?.content || "Tidak ada jawaban.";
 
     return Response.json({ reply });
 
   } catch (error) {
     console.error("API ERROR:", error);
-
     return Response.json(
       { reply: "Terjadi kesalahan server." },
       { status: 500 }
