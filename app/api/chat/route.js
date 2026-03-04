@@ -1,31 +1,54 @@
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 export async function POST(req) {
+  try {
+    const body = await req.json();
+    const message = body.message;
 
-  const { message } = await req.json()
+    if (!message) {
+      return Response.json(
+        { reply: "Pesan kosong." },
+        { status: 400 }
+      );
+    }
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.AI_API_KEY}`
-    },
-    body: JSON.stringify({
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json(
+        { reply: "OPENAI_API_KEY belum diset." },
+        { status: 500 }
+      );
+    }
+
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "Kamu adalah AI pesantren yang santun dan islami."
+          content: "Kamu adalah AI Santri yang sopan, ramah, dan cerdas.",
         },
         {
           role: "user",
-          content: message
-        }
-      ]
-    })
-  })
+          content: message,
+        },
+      ],
+    });
 
-  const data = await response.json()
+    const reply =
+      completion.choices?.[0]?.message?.content ||
+      "AI tidak memberikan jawaban.";
 
-  return Response.json({
-    reply: data.choices[0].message.content
-  })
+    return Response.json({ reply });
+
+  } catch (error) {
+    console.error("API ERROR:", error);
+
+    return Response.json(
+      { reply: "Terjadi kesalahan server." },
+      { status: 500 }
+    );
+  }
 }
