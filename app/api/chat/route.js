@@ -5,12 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return Response.json(
-        { reply: "API KEY tidak terbaca." },
-        { status: 500 }
-      );
-    }
+    console.log("KEY ADA?", !!process.env.OPENAI_API_KEY);
 
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -19,20 +14,17 @@ export async function POST(req) {
     const body = await req.json();
     const message = body.message;
 
-    if (!message) {
-      return Response.json(
-        { reply: "Pesan kosong." },
-        { status: 400 }
-      );
-    }
+    console.log("MESSAGE:", message);
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-3.5-turbo", // ganti dulu ke ini untuk test
       messages: [
-        { role: "system", content: "Kamu adalah AI Santri." },
+        { role: "system", content: "Test" },
         { role: "user", content: message },
       ],
     });
+
+    console.log("COMPLETION:", completion);
 
     const reply =
       completion?.choices?.[0]?.message?.content ||
@@ -41,10 +33,9 @@ export async function POST(req) {
     return Response.json({ reply });
 
   } catch (error) {
-    console.error("OPENAI ERROR:", error);
-
+    console.error("FULL OPENAI ERROR:", error);
     return Response.json(
-      { reply: "Terjadi kesalahan server." },
+      { reply: "SERVER ERROR - cek logs" },
       { status: 500 }
     );
   }
