@@ -2,6 +2,7 @@ import OpenAI from "openai";
 
 export const runtime = "nodejs";
 
+console.log("KEY ADA?", !!process.env.OPENAI_API_KEY);
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
